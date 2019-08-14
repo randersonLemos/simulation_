@@ -87,8 +87,8 @@ def generate_injectors(idx, verbose=True):
 
 
 if __name__ == '__main__':
-    for i in range(1):
+    for i in range(3):
         generate_producers(i, verbose=True)
         generate_injectors(i, verbose=True)
+    for i in range(3):
         run_imex(i, see_log=True, verbose=True)
-
