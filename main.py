@@ -1,12 +1,16 @@
 import pathlib
 from settings import *
-from run.scripts import imex
+from run.scripts import imex, report
 from well.scripts import wells, utils
+from itertools import cycle
+import time
+import log
 
 
 def run_imex(idx, see_log=False, verbose=False):
-    imexx = imex.IMEX(
+    imexx = imex.IMEX(            
               machine = MACHINE
+            , idx = idx
             , exe = IMEX_EXE
             , dat_file = ROOT / IMEX_FOLDER_DAT / 'sim_{:03d}'.format(idx) / 'main.dat'
             , output_folder = ROOT / IMEX_FOLDER_OUT / 'sim_{:03d}'.format(idx)
@@ -18,6 +22,20 @@ def run_imex(idx, see_log=False, verbose=False):
             )
     imexx.run()
     return imexx
+
+
+def run_report(idx, verbose=False):
+    root = Path(ROOT)
+    if MACHINE == 'remote':
+        root = Path(ROOT_LOCAL)
+        
+    repor = report.REPORT(
+              exe = REPORT_EXE
+            , irf_file = root / REPORT_FOLDER_IRF / 'sim_{:03d}'.format(idx) / 'main.irf'
+            , output_folder = root / REPORT_FOLDER_OUT / 'sim_{:03d}'.format(idx)
+            , verbose = verbose
+            )
+    repor.run()
 
 
 def generate_producers(idx, verbose=False):
@@ -51,7 +69,7 @@ def generate_producers(idx, verbose=False):
     return ws
 
 
-def generate_injectors(idx, verbose=True):
+def generate_injectors(idx, verbose=False):
     path = Path(ROOT / IMEX_FOLDER_OUT / 'sim_{:03d}'.format(idx))
     if MACHINE == 'remote':
         path = Path(ROOT_LOCAL / IMEX_FOLDER_OUT / 'sim_{:03d}'.format(idx))
@@ -86,9 +104,26 @@ def generate_injectors(idx, verbose=True):
     return ws
 
 
+
 if __name__ == '__main__':
-    for i in range(3):
-        generate_producers(i, verbose=True)
-        generate_injectors(i, verbose=True)
-    for i in range(3):
-        run_imex(i, see_log=True, verbose=True)
+    for idx in range(N_SIMS):
+        generate_producers(idx, verbose=True)
+        generate_injectors(idx, verbose=True)        
+    
+    sims = []
+    for idx in range(N_SIMS):
+        sims.append(run_imex(idx, see_log=False, verbose=True))
+    
+    while sims:
+        for idx, sim in enumerate(sims):
+            if sim.is_alive():
+                print("******SIMULATION 'sim_{:03d}'******".format(idx))
+                log.Log.see(idx)
+                print("********************************")
+                time.sleep(30)
+            else:
+                print("Simulation 'sim_{:03d}' fineshed. Generating report.".format(idx))                
+                run_report(sims[idx].idx, verbose=True)
+                del sims[idx]
+                break
+            

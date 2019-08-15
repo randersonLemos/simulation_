@@ -8,6 +8,9 @@ Created on Sat Aug 10 09:04:54 2019
 from pathlib import Path, PurePosixPath
 
 
+#N_SIMS = 50
+
+
 #MACHINE = 'remote'
 #MACHINE = 'local'
 if MACHINE == 'local':
@@ -32,15 +35,16 @@ else:
     raise ValueError("MACHINE must be 'local' or 'remote'")
 
 
-#REPORT_EXE = 'C:\\Program Files (x86)\\CMG\\BR\\2017.10\\Win_x64\\EXE\\report.exe'
-#REPORT_IRF = 'U:/simulation/results/main.irf'
-#REPORT_FOLDER_OUT =  'U:/simulation/results'
+REPORT_EXE = 'C:\\Program Files (x86)\\CMG\\BR\\2017.10\\Win_x64\\EXE\\report.exe'
+REPORT_FOLDER_IRF = 'results'
+REPORT_FOLDER_OUT = 'results'
 
 
 PRODS_KEYS       = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 PRODS_NAMES      = {1:'PRK014', 2:'PRK028', 3:'PRK045', 4:'PRK052', 5:'PRK060', 6:'PRK061', 7:'PRK083', 8:'PRK084', 9:'PRK085', 10:'Pwildc'}
 PRODS_OPEN_TIMES = {1:'1704.0', 2:'1612.0', 3:'1369.0', 4:'1765.0', 5:'1492.0', 6:'1673.0', 7:'1431.0', 8:'1308.0', 9:'1247.0', 10:'1553.0'}
 PRODS_ICVS_QTYS  = {1:3       , 2:2       , 3:3       , 4:2       , 5:2       , 6:3       , 7: 3      , 8:2       , 9:3       , 10:0       }
+
 
 INJES_KEYS = [1, 2, 3, 4, 5, 6, 7, 8]
 INJES_NAMES = {1:'IRK004', 2:'IRK028', 3:'IRK029', 4:'IRK036', 5:'IRK049', 6:'IRK050', 7:'IRK056', 8:'IRK063'}
