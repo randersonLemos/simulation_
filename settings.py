@@ -8,7 +8,7 @@ Created on Sat Aug 10 09:04:54 2019
 from pathlib import Path, PurePosixPath
 
 
-MACHINE = 'remote'
+#MACHINE = 'remote'
 #MACHINE = 'local'
 if MACHINE == 'local':
     ROOT = Path('U:/simulation')
@@ -27,6 +27,7 @@ elif MACHINE == 'remote':
     USER = 'randerson'
     CLUSTER_NAME = 'hpc02'
     QUEUE_KIND = 'longas'
+    PUTTY_EXE = Path('C:/\"Program Files (x86)"/PuTTY/plink.exe')
 else:
     raise ValueError("MACHINE must be 'local' or 'remote'")
 
@@ -45,10 +46,3 @@ INJES_KEYS = [1, 2, 3, 4, 5, 6, 7, 8]
 INJES_NAMES = {1:'IRK004', 2:'IRK028', 3:'IRK029', 4:'IRK036', 5:'IRK049', 6:'IRK050', 7:'IRK056', 8:'IRK063'}
 INJES_OPEN_TIMES = {1:['WATER','1734.0'], 2:['WATER','1643.0'], 3:['WATER','1400.0'], 4:['GAS','1584.0'], 5:['GAS','1522.0'], 6:['WATER','1461.0'], 7:['GAS','1339.0'], 8:['GAS','1278.0']}
 INJES_WAGSS = {1:'GAS', 2:'GAS', 3:'GAS', 4:'WATER', 5:'WATER', 6:'GAS', 7:'WATER', 8:'WATER'}
-
-
-class Paths:
-    putty = Path('C:/\"Program Files (x86)"/PuTTY/plink.exe')    
-    
-class Cluster:
-    name = 'hpc02'
