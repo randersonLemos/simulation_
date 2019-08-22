@@ -1,8 +1,9 @@
 import log
+import shutil
 from settings import *
 from run.scripts import imex, report
 from itertools import cycle
- 
+
 def generate_producers(well_completion, well_opening, well_on_time, icv_layerclump, icv_start, icv_control, output_folder):
     from well2 import frames
     from well2 import utils
@@ -58,6 +59,16 @@ def generate_injectors_wag(well_completion, well_opening, well_on_time, well_wag
 if __name__ == '__main__':   
     import settings as sett            
     idx = 1
+    
+    from distutils.file_util import copy_file
+    from distutils.dir_util import copy_tree   
+    
+    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)).mkdir(parents=True, exist_ok=True)
+    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'includes').mkdir(parents=True, exist_ok=True)
+    
+    copy_file(str(sett.ROOT_LOCAL / 'dat2' / 'main.dat'), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)))
+    copy_tree(str(sett.ROOT_LOCAL / 'dat2' / 'includes'), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'includes'))
+    
     import well2.infos1 as infos1
     generate_producers(infos1.well_completion
         , infos1.well_opening
@@ -65,7 +76,7 @@ if __name__ == '__main__':
         , infos1.icv_layerclump
         , infos1.icv_start
         , infos1.icv_control
-        , sett.ROOT / sett.IMEX_FOLDER_DAT / 'sim_{:03d}'.format(idx) / 'wells'
+        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'wells'
         )   
     
     import well2.infos2 as infos2
@@ -74,7 +85,7 @@ if __name__ == '__main__':
         , infos2.well_opening
         , infos2.well_on_time
         , infos2.well_wag
-        , sett.ROOT / sett.IMEX_FOLDER_DAT / 'sim_{:03d}'.format(idx) / 'wells'
+        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'wells'
         )
      
     root = sett.ROOT_LOCAL
@@ -82,8 +93,8 @@ if __name__ == '__main__':
     imexx = imex.IMEX(            
           sett.MACHINE
         , sett.IMEX_EXE
-        , root / sett.IMEX_FOLDER_DAT / 'sim_{:03d}'.format(idx) / 'main.dat'
-        , root / sett.IMEX_FOLDER_OUT / 'sim_{:03d}'.format(idx)
+        , root / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'main.dat'
+        , root / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)
         , sett.USER
         , sett.CLUSTER_NAME
         , sett.QUEUE_KIND
@@ -92,10 +103,13 @@ if __name__ == '__main__':
         )
     imexx.run()
     
+    while imexx.is_alive():
+        pass
+    
     repor = report.REPORT(
           exe = sett.REPORT_EXE
-        , irf_file = sett.ROOT_LOCAL / sett.REPORT_FOLDER_IRF / 'sim_{:03d}'.format(idx) / 'main.irf'
-        , output_folder = sett.ROOT_LOCAL / sett.REPORT_FOLDER_OUT / 'sim_{:03d}'.format(idx)
+        , irf_file = sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'main.irf'
+        , output_folder = sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)
         , verbose = True
         )
     repor.run()
