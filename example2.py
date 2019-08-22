@@ -1,7 +1,7 @@
 import log
 import shutil
-from settings import *
-from run.scripts import imex, report
+import settings as sett            
+from run2 import imex, report
 from itertools import cycle
 
 def generate_producers(well_completion, well_opening, well_on_time, icv_layerclump, icv_start, icv_control, output_folder):
@@ -55,20 +55,8 @@ def generate_injectors_wag(well_completion, well_opening, well_on_time, well_wag
 
         i.build()
         i.write(pathlib.Path(output_folder) / '{}.inc'.format(key))
-           
-if __name__ == '__main__':   
-    import settings as sett            
-    idx = 1
     
-    from distutils.file_util import copy_file
-    from distutils.dir_util import copy_tree   
-    
-    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)).mkdir(parents=True, exist_ok=True)
-    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'includes').mkdir(parents=True, exist_ok=True)
-    
-    copy_file(str(sett.ROOT_LOCAL / 'dat2' / 'main.dat'), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)))
-    copy_tree(str(sett.ROOT_LOCAL / 'dat2' / 'includes'), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'includes'))
-    
+def generate_wells(sim_folder):
     import well2.infos1 as infos1
     generate_producers(infos1.well_completion
         , infos1.well_opening
@@ -76,7 +64,7 @@ if __name__ == '__main__':
         , infos1.icv_layerclump
         , infos1.icv_start
         , infos1.icv_control
-        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'wells'
+        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder / 'wells'
         )   
     
     import well2.infos2 as infos2
@@ -85,16 +73,17 @@ if __name__ == '__main__':
         , infos2.well_opening
         , infos2.well_on_time
         , infos2.well_wag
-        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'wells'
+        , sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder / 'wells'
         )
-     
+
+def simulation(sim_folder):
     root = sett.ROOT_LOCAL
     if sett.MACHINE == 'remote': root = sett.ROOT_REMOTE
     imexx = imex.IMEX(            
           sett.MACHINE
         , sett.IMEX_EXE
-        , root / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'main.dat'
-        , root / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)
+        , root / sett.MAIN_FOLDER / sim_folder / sett.DAT_FILE
+        , root / sett.MAIN_FOLDER / sim_folder
         , sett.USER
         , sett.CLUSTER_NAME
         , sett.QUEUE_KIND
@@ -102,14 +91,35 @@ if __name__ == '__main__':
         , verbose = True
         )
     imexx.run()
+    return imexx
     
-    while imexx.is_alive():
-        pass
-    
+def generate_report(sim_folder):
     repor = report.REPORT(
           exe = sett.REPORT_EXE
-        , irf_file = sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx) / 'main.irf'
-        , output_folder = sett.ROOT_LOCAL / sett.MAIN_FOLDER / 'sim_{:03d}'.format(idx)
+        , irf_file = sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder / sett.IRF_FILE
+        , output_folder = sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder
         , verbose = True
         )
     repor.run()
+
+def some_settings(sim_folder):
+    from distutils.file_util import copy_file
+    from distutils.dir_util import copy_tree   
+    
+    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder).mkdir(parents=True, exist_ok=True)
+    (sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder / 'includes').mkdir(parents=True, exist_ok=True)
+    
+    copy_file(str(sett.ROOT_LOCAL / 'dat2' / sett.DAT_FILE), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder))
+    copy_tree(str(sett.ROOT_LOCAL / 'dat2' / 'includes'), str(sett.ROOT_LOCAL / sett.MAIN_FOLDER / sim_folder / 'includes')) 
+    
+if __name__ == '__main__':       
+    idx = 1    
+    sim_folder = 'sim_{:03d}'.format(idx)
+    
+    some_settings(sim_folder)
+    generate_wells(sim_folder)
+    
+    sims = []
+    sims.append(simulation(sim_folder))
+    
+    
