@@ -11,6 +11,7 @@ ROOT_LOCAL  = Path('U:/simulation')
 MAIN_FOLDER = Path('sims')
 DAT_FILE    = Path('main.dat')
 IRF_FILE    = Path('main.irf')
+REP_FILE    = Path('main.rep')
 IMEX_EXE    = Path('C:/"Program Files (x86)"/CMG/IMEX/2017.10/Win_x64/EXE/mx201710.exe')
 USER = ''
 QUEUE_KIND = ''
