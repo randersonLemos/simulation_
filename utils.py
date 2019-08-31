@@ -73,3 +73,31 @@ def generate_report(sim_folder, verbose):
             , verbose= verbose
             )
     repo.run()    
+    
+def icv_start():
+    dic = {}
+    dic['PRK085'] = (2008.0, 200, 183)
+    dic['PRK084'] = (2008.0, 200, 183)
+    dic['PRK045'] = (2008.0, 200, 183)
+    dic['PRK083'] = (2008.0, 200, 183)
+    dic['PRK060'] = (2008.0, 200, 183)
+    dic['PRK028'] = (2008.0, 200, 183)
+    dic['PRK061'] = (2008.0, 200, 183)
+    dic['PRK014'] = (2008.0, 200, 183)
+    dic['PRK052'] = (2008.0, 200, 183)
+    dic['PWILDC'] = ()
+    return dic
+
+def icv_control_close(GOR, WCUT):
+    dic = {}
+    dic['PRK085'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*3
+    dic['PRK084'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*2
+    dic['PRK045'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*3
+    dic['PRK083'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*3
+    dic['PRK060'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*2
+    dic['PRK028'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*2
+    dic['PRK061'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*3
+    dic['PRK014'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*3
+    dic['PRK052'] = [(('*GOR > {}'.format(GOR),0.0),('*WCUT > {}'.format(WCUT),0.0))]*2
+    dic['PWILDC'] = []
+    return dic
