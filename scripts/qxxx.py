@@ -52,10 +52,7 @@ class Qxxx:
         
     @classmethod
     def _cmd_qdel_username(cls, username, verbose):
-        command = str(sett.LOCAL_PUTT_EXE) +\
-                " -load {} qdel -u {}".format(sett.CLUSTER_NAME, username)
-        if verbose: print("qdel command:\n\t{}".format(command))
-        return command        
+        raise NotImplementedError
         
     @classmethod
     def _cmd_qdel_pid(cls, pid, verbose):
@@ -68,7 +65,7 @@ class Qxxx:
     @classmethod
     def _cmd_qdel_all(cls, verbose):
         command = str(sett.LOCAL_PUTT_EXE) +\
-                " -load {} qdel".format(sett.CLUSTER_NAME)
+                " -load {} qdel all".format(sett.CLUSTER_NAME)
         if verbose: print("qstat command:\n\t{}".format(command))
         return command
     

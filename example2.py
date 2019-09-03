@@ -56,19 +56,28 @@ if __name__ == '__main__':
     import itertools
     
     GORS  = numpy.linspace(3000, 30000, 10)
-    WCUTS = numpy.linspace(0.7, 0.95, 6)
+    WCUTS = numpy.linspace(70.0, 95.0, 6)
     lst   = list(itertools.product(GORS, WCUTS))
-    
+
+    sims = []
+    sim_folders = []
     for idx, (GOR, WCUT) in enumerate(lst):
-        sim_folder = 'sim_icv_control_{:03d}'.format(idx+1)
+        sim_folder = 'sim_{:03d}'.format(idx+1)
+        sim_folders.append(sim_folder)
     
         utils.setting_files(sim_folder)
         prod_generator(sim_folder, icv_start=utils.icv_start(), icv_control=utils.icv_control_close(GOR, WCUT))
         inje_generator(sim_folder)
     
-        sims = []
-        sims.append(utils.run_imex_remote(sim_folder, see_log=False, verbose=True))
+        sims.append(utils.run_imex_remote(sim_folder, see_log=False, verbose=True))      
         
-    csim = itertools.cycle(sims)
-    for sim in csim:
-        sim.is_alive()
+    while sims:
+        for idx, sim in enumerate(sims):
+            if sim.is_alive():
+                pass
+            else:
+                del sims[idx]
+                break
+            
+    for sim_folder in sim_folders:        
+        utils.generate_report(sim_folder, True)
