@@ -6,7 +6,7 @@ Created on Wed Aug 14 14:58:55 2019
 """
 
 import subprocess
-import settings as sett
+from config.scripts import settings as sett
 
 class Qxxx:
     @classmethod
