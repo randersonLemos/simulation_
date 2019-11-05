@@ -49,43 +49,36 @@ def injectors_wag(sim_folder):
 
 
 if __name__ == '__main__':
-    import numpy
-    import itertools
     from scripts import utils
     from config.scripts import settings as sett
     from dictionary.scripts.dictionary import Keywords as kw
-    qty1 = [(kw.gor(),  val) for val in numpy.linspace(500, 5000, 19)]
-    qty2 = [(kw.wcut(), val) for val in numpy.linspace(0.70, 0.95, 6)]
-    qtys = list(itertools.product(qty1, qty2))
 
-    sims = []
-    for idx, qty in enumerate(qtys):
-        sim_folder = 'sim_{:03d}'.format(idx+1)
-        path_to_sim_folder = sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder
+    sim_folder = 'sim_001'
+    path_to_sim_folder = sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder
 
-        utils.set_folders(sim_folder)
+    utils.set_folders(sim_folder)
 
-        from valve.scripts import icv
-        from inputt.scripts.infos import prods_lst
-        for name in prods_lst:
-            try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
-            except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
-            icvv = icv.ICV(well.icv_nr)
-            well.icv_operational = icvv.binary((qty[0][0], qty[0][1], 'AND', qty[1][0], qty[1][1]))
-            icvv.write(path_to_sim_folder / sett.IRF_NAME)
-            producers_icv_binary(sim_folder, well)
+    from valve.scripts import icv
+    from inputt.scripts.infos import prods_lst
+    for name in prods_lst:
+        try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
+        except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
+        icvv = icv.ICV(well.icv_nr)
+        well.icv_operational = icvv.incremental(
+                          (  (kw.gor()  , 0.0, 500.0, 750.0, 1000.0,)
+                           , (kw.wcut() , 0.0, 0.85, 0.90, 0.95,)
+                           ,
+                           )
+                        , (1.0, 0.50, 0.0,)
+                        , ('OR',)
+                        )
+        icvv.write(path_to_sim_folder / sett.IRF_NAME)
+        producers_icv_binary(sim_folder, well)
 
-        injectors_wag(sim_folder)
+    injectors_wag(sim_folder)
 
-        sims.append((sim_folder, utils.run_imex_remote(sim_folder, True, True)))
+    sim = utils.run_imex_remote(sim_folder, True, True)
 
-    while sims:
-        for idx, (_,sim) in enumerate(sims):
-            if sim.is_alive():
-                pass
-            else:
-                del sims[idx]
-                break
+    while sim.is_alive(): pass
 
-    for (sim_folder,_) in sims:
-        utils.run_report(sim_folder, True)
+    utils.run_report(sim_folder, True)
