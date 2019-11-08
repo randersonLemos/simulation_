@@ -64,7 +64,7 @@ if __name__ == '__main__':
         try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
         except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
         icvv = icv.ICV(well.icv_nr)
-        well.icv_operational = icvv.binary((kw.gor(),1000.0),(kw.wcut(),95.0))
+        well.icv_operational = icvv.binary((kw.gor(), kw.greater_than(), 1000.0, 'OR', '*STO-RP', kw.less_than(), 250),(kw.wcut(), kw.greater_than(),95.0))
         icvv.write(path_to_sim_folder / sett.INF_NAME)
         producers_icv_binary(sim_folder, well)
 
