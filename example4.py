@@ -66,13 +66,13 @@ if __name__ == '__main__':
         icvv = icv.ICV(well.icv_nr)
         well.icv_operational = icvv.incremental(
                           (  (kw.gor()  , 0.0, 500.0, 750.0, 1000.0,)
-                           , (kw.wcut() , 0.0, 0.85, 0.90, 0.95,)
+                           , (kw.wcut() , 0.0, 85.0, 90.0, 95.0,)
                            ,
                            )
                         , (1.0, 0.50, 0.0,)
-                        , ('OR',)
+                        , ('OR2',)
                         )
-        icvv.write(path_to_sim_folder / sett.IRF_NAME)
+        icvv.write(path_to_sim_folder / sett.INF_NAME)
         producers_icv_binary(sim_folder, well)
 
     injectors_wag(sim_folder)

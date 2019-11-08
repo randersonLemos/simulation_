@@ -54,8 +54,8 @@ if __name__ == '__main__':
     from scripts import utils
     from config.scripts import settings as sett
     from dictionary.scripts.dictionary import Keywords as kw
-    qty1 = [(kw.gor(),  val) for val in numpy.linspace(500, 5000, 19)]
-    qty2 = [(kw.wcut(), val) for val in numpy.linspace(0.70, 0.95, 6)]
+    qty1 = [(kw.gor(),  val) for val in numpy.linspace(250, 5000, 20)]
+    qty2 = [(kw.wcut(), val) for val in numpy.linspace(75.0, 95.0, 5)]
     qtys = list(itertools.product(qty1, qty2))
 
     sims = []
@@ -71,13 +71,13 @@ if __name__ == '__main__':
             try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
             except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
             icvv = icv.ICV(well.icv_nr)
-            well.icv_operational = icvv.binary((qty[0][0], qty[0][1], 'AND', qty[1][0], qty[1][1]))
-            icvv.write(path_to_sim_folder / sett.IRF_NAME)
+            well.icv_operational = icvv.binary((qty[0][0], qty[0][1], 'OR', qty[1][0], qty[1][1]))
+            icvv.write(path_to_sim_folder / sett.INF_NAME)
             producers_icv_binary(sim_folder, well)
 
         injectors_wag(sim_folder)
 
-        sims.append((sim_folder, utils.run_imex_remote(sim_folder, True, True)))
+        sims.append((sim_folder, utils.run_imex_remote(sim_folder, False, True)))
 
     while sims:
         for idx, (_,sim) in enumerate(sims):
