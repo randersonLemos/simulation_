@@ -65,11 +65,11 @@ if __name__ == '__main__':
         except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
         icvv = icv.ICV(well.icv_nr)
         well.icv_operational = icvv.incremental(
-                          (  (kw.gor()  , 0.0, 500.0, 625.0, 750.0, 875.0, 1000.0,)
-                           , (kw.wcut() , 0.0, 85.0, 87.5, 90.0, 92.5, 95.0)
+                          (  (kw.gor()  , 500.0, 625.0, 750.0, 875.0, 1000.0,)
+                           , (kw.wcut() , 85.0, 87.5, 90.0, 92.5, 95.0)
                            ,
                            )
-                        , (1.0, 0.75, 0.50, 0.25, 0.0)
+                        , (0.8, 0.6, 0.4, 0.2, 0.0)
                         , ('OR2',)
                         )
         icvv.write(path_to_sim_folder / sett.INF_NAME)
