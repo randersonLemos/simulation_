@@ -50,37 +50,48 @@ def injectors_wag(sim_folder):
 
 if __name__ == '__main__':
     import numpy
+    import itertools
     from scripts import utils
     from config.scripts import settings as sett
     from dictionary.scripts.dictionary import Keywords as kw
+    
+    import random
+    from inputt.scripts.infos import prods_lst
 
-    fct = 2.0
-    n_valve_stages = 8
-    qtys = numpy.linspace(250, 5000, 20).tolist()
-    valve_opening = tuple(numpy.linspace(0.0,1.0,n_valve_stages).tolist()[::-1][1:])
+    bag = [123, 153, 183, 213, 243]
+    freqs = []
+    nr_sims = 1000
+    for i in range(nr_sims):
+        dic = {}
+        for well in prods_lst:
+            dic[well] = random.choice(bag)
+        freqs.append(dic)
+    
     sims = []
-    for idx, qty in enumerate(qtys):
-        sim_folder = 'SIM_ICV_8_STGS/sim_{:03d}'.format(idx+1)
+    for idx, freq in enumerate(freqs):
+        sim_folder = 'SIM_ICV_2_STGS_FREQ/sim_{:03d}'.format(idx+1)
         path_to_sim_folder = sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder
 
         utils.set_folders(sim_folder)
 
         from valve.scripts import icv
-        from inputt.scripts.infos import prods_lst
-        tup = (kw.gor(),) + tuple(numpy.linspace(qty, fct*qty, n_valve_stages-1))
         for name in prods_lst:
             try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
             except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
             icvv = icv.ICV(well.icv_nr)
-            well.icv_operational = icvv.incremental(
-                              (tup ,)
-                            , valve_opening
-                            , ()
-                            )
+            well.icv_operational = icvv.binary(('*GOR', '>', 1000.0))
+            well.icv_start = (2008, freq[name], 500)
+            if well == 'Wildcat':
+                well.icv_start = []
+            
             icvv.write(path_to_sim_folder / sett.INF_NAME)
+            with open(path_to_sim_folder / sett.INF_NAME, 'a') as fh:
+                fh.write(freq.__repr__())
+            
             producers_icv_binary(sim_folder, well)
 
         injectors_wag(sim_folder)
+
         sims.append((sim_folder, utils.run_imex_remote(sim_folder, False, True)))
 
     while sims:
@@ -93,4 +104,3 @@ if __name__ == '__main__':
 
     for (sim_folder,_) in sims:
         utils.run_report(sim_folder, True)
-        sim = utils.run_imex_remote(sim_folder, True, True)
