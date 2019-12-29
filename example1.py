@@ -1,31 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Aug 10 09:04:54 2019
-
-@author: randerson
+File for generation of wells and simulation running.
+Codes for fire simulation are commented.
 """
 
 
 def producers(sim_folder):
     from config.scripts import settings as sett
     from assembly.scripts.producer_dual_icv import producer_dual_icv
-    from inputt.scripts.infos import prods_lst
-
-    for name in prods_lst:
-        try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
-        except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
-        producer_dual_icv(  name
-                          , well.group
-                          , well.operate
-                          , well.monitor
-                          , well.geometry
-                          , well.perf
-                          , well.completion
-                          , well.openn
-                          , well.on_time
-                          , well.layerclump
-                          , []
-                          , []
+    from inputt.loader import prod_lst
+    for prod in prod_lst:
+        prod.load_more_more()
+        producer_dual_icv(  prod.name
+                          , prod.group
+                          , prod.operate
+                          , prod.monitor
+                          , prod.geometry
+                          , prod.perf_ff
+                          , prod.perf_table
+                          , prod.time_open
+                          , prod.time_on
+                          , prod.layerclump
+                          , []#prod.icv_operation
+                          , []#prod.icv_control_law
                           , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                           )
 
@@ -33,22 +30,20 @@ def producers(sim_folder):
 def injectors_wag(sim_folder):
     from config.scripts import settings as sett
     from assembly.scripts.injector_dual_wag import injector_dual_wag
-    from inputt.scripts.infos import injes_lst
-
-    for name in injes_lst:
-        try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
-        except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
-        injector_dual_wag(  name
-                          , well.group
-                          , well.operate
-                          , well.monitor
-                          , well.geometry
-                          , well.perf
-                          , well.completion
-                          , well.openn
-                          , well.on_time
-                          , well.wag_cycle
-                          , well.layerclump
+    from inputt.loader import inje_lst
+    for inje in inje_lst:
+        inje.load_more_more()
+        injector_dual_wag(  inje.name
+                          , inje.group
+                          , inje.operate
+                          , inje.monitor
+                          , inje.geometry
+                          , inje.perf_ff
+                          , inje.perf_table
+                          , inje.time_open
+                          , inje.time_on
+                          , inje.wag_operation
+                          , inje.layerclump
                           , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                           )
 
@@ -57,15 +52,13 @@ from scripts import utils
 
 
 if __name__ == '__main__':
-    sim_folder = 'sim_001'
+    sim_folder = 'REFERENCE_OTM'
 
     utils.set_folders(sim_folder)
 
-    producers(sim_folder)
-    injectors(sim_folder)
+    #producers(sim_folder)
+    #injectors_wag(sim_folder)
 
-    sim = utils.run_imex_remote(sim_folder, True, True)
-
-    while sim.is_alive(): pass
-
+    #sim = utils.run_imex_remote(sim_folder, True, True)
+    #while sim.is_alive(): pass
     utils.run_report(sim_folder, True)
