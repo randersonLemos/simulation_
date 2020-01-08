@@ -5,8 +5,7 @@ Codes for fire simulation are commented.
 """
 
 
-def producers(sim_folder):
-    from config.scripts import settings as sett
+def producers(path_to_save):
     from assembly.scripts.producer_dual_icv import producer_dual_icv
     from inputt.loader import prod_lst
     for prod in prod_lst:
@@ -23,12 +22,11 @@ def producers(sim_folder):
                           , prod.layerclump
                           , []#prod.icv_operation
                           , []#prod.icv_control_law
-                          , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
+                          , path_to_save
                           )
 
 
-def injectors_wag(sim_folder):
-    from config.scripts import settings as sett
+def injectors_wag(path_to_save):
     from assembly.scripts.injector_dual_wag import injector_dual_wag
     from inputt.loader import inje_lst
     for inje in inje_lst:
@@ -44,21 +42,14 @@ def injectors_wag(sim_folder):
                           , inje.time_on
                           , inje.wag_operation
                           , inje.layerclump
-                          , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
+                          , path_to_save
                           )
 
 
-from scripts import utils
+from config.scripts import settings as sett
 
 
 if __name__ == '__main__':
-    sim_folder = 'REFERENCE_OTM/sim_001'
-
-    utils.set_folders(sim_folder)
-
-    producers(sim_folder)
-    injectors_wag(sim_folder)
-
-    sim = utils.run_imex_remote(sim_folder, True, True)
-    while sim.is_alive(): pass
-    utils.run_report(sim_folder, True)
+    path_to_save = sett.LOCAL_ROOT / sett.SIMS_FOLDER / 'wells'
+    producers(path_to_save)
+    injectors_wag(path_to_save)
