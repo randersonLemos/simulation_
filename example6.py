@@ -9,18 +9,18 @@ Created on Sat Aug 10 09:04:54 2019
 def producers_icv_binary(sim_folder, well):
     from config.scripts import settings as sett
     from assembly.scripts.producer_dual_icv import producer_dual_icv
-    producer_dual_icv(  name
+    producer_dual_icv(  well.name
                       , well.group
                       , well.operate
                       , well.monitor
                       , well.geometry
-                      , well.perf
-                      , well.completion
-                      , well.openn
-                      , well.on_time
+                      , well.perf_ff
+                      , well.perf_table
+                      , well.time_open
+                      , well.time_on
                       , well.layerclump
-                      , well.icv_start
-                      , well.icv_operational
+                      , well.icv_operation
+                      , well.icv_control_law
                       , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                       )
 
@@ -28,69 +28,67 @@ def producers_icv_binary(sim_folder, well):
 def injectors_wag(sim_folder):
     from config.scripts import settings as sett
     from assembly.scripts.injector_dual_wag import injector_dual_wag
-    from inputt.scripts.infos import injes_lst
-
-    for name in injes_lst:
-        try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
-        except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
-        injector_dual_wag(   name
-                          , well.group
-                          , well.operate
-                          , well.monitor
-                          , well.geometry
-                          , well.perf
-                          , well.completion
-                          , well.openn
-                          , well.on_time
-                          , well.wag_cycle
-                          , well.layerclump
+    from inputt.loader import inje_lst
+    for inje in inje_lst:
+        inje.load_more_more()
+        injector_dual_wag(  inje.name
+                          , inje.group
+                          , inje.operate
+                          , inje.monitor
+                          , inje.geometry
+                          , inje.perf_ff
+                          , inje.perf_table
+                          , inje.time_open
+                          , inje.time_on
+                          , inje.wag_operation
+                          , inje.layerclump
                           , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                           )
 
 
 if __name__ == '__main__':
     import numpy
+    import pathlib
+    import itertools
     from scripts import utils
     from config.scripts import settings as sett
-    from dictionary.scripts.dictionary import Keywords as kw
+    from dictionary.scripts.keywords import Keywords as kw
 
-    fct = 2.0
-    n_valve_stages = 8
-    qtys = numpy.linspace(250, 5000, 20).tolist()
-    valve_opening = tuple(numpy.linspace(0.0,1.0,n_valve_stages).tolist()[::-1][1:])
+    qtys = [(kw.gor(),  val) for val in numpy.linspace(250, 5000, 20)]
+
+    #sim_folder_group = pathlib.Path('DEFAULT')
+    sim_folder_group = pathlib.Path('SIM_ICV_03_STG')
     sims = []
     for idx, qty in enumerate(qtys):
-        sim_folder = 'SIM_ICV_8_STGS/sim_{:03d}'.format(idx+1)
-        path_to_sim_folder = sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder
+        sim_folder = sim_folder_group / 'sim_{:03d}'.format(idx+1)
 
         utils.set_folders(sim_folder)
 
         from valve.scripts import icv
-        from inputt.scripts.infos import prods_lst
-        tup = (kw.gor(),) + tuple(numpy.linspace(qty, fct*qty, n_valve_stages-1))
-        for name in prods_lst:
-            try: well = __import__('inputt.scripts.{}'.format(name), fromlist=name)
-            except ImportError: raise('Error importing', 'inputt.scripts.{}'.format(name), '.')
-            icvv = icv.ICV(well.icv_nr)
-            well.icv_operational = icvv.incremental(
-                              (tup ,)
-                            , valve_opening
-                            , ()
-                            )
-            icvv.write(path_to_sim_folder / sett.INF_NAME)
-            producers_icv_binary(sim_folder, well)
+        from inputt.loader import prod_lst
+        for prod in prod_lst:
+            prod.load_more_more()
+            icvv = icv.ICV(prod.icv_nr)
+            minn = 0.50*qty[1]
+            maxx = qty[1]
+            inte = (maxx-minn) / 2
+            icvv.add_rule([qty[0], kw.greater_than(),  minn         , 0.66])
+            icvv.add_rule([qty[0], kw.greater_than(),  minn +   inte, 0.33])
+            icvv.add_rule([qty[0], kw.greater_than(),  minn + 2*inte, 0.00])
+            icvv.write(sim_folder)
+            prod.icv_operation = (2008, 183, 200)
+            prod.icv_control_law = icvv.get_control_law()
+            producers_icv_binary(sim_folder, prod)
 
         injectors_wag(sim_folder)
-        sims.append((sim_folder, utils.run_imex_remote(sim_folder, False, True)))
 
-    while sims:
-        for idx, (_,sim) in enumerate(sims):
-            if sim.is_alive():
-                pass
-            else:
-                del sims[idx]
-                break
+   #     sims.append((sim_folder, utils.run_imex_remote(sim_folder, False, True)))
 
-    for (sim_folder,_) in sims:
-        utils.run_report(sim_folder, True)
-        sim = utils.run_imex_remote(sim_folder, True, True)
+   # while sims:
+   #     for idx, (sim_folder ,sim) in enumerate(sims):
+   #         if sim.is_alive():
+   #             pass
+   #         else:
+   #             utils.run_report(sim_folder, True)
+   #             del sims[idx]
+   #

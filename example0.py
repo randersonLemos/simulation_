@@ -5,7 +5,8 @@ Codes for fire simulation are commented.
 """
 
 
-def producers(path_to_save):
+def producers(sim_folder):
+    from config.scripts import settings as sett
     from assembly.scripts.producer_dual_icv import producer_dual_icv
     from inputt.loader import prod_lst
     for prod in prod_lst:
@@ -22,11 +23,12 @@ def producers(path_to_save):
                           , prod.layerclump
                           , []#prod.icv_operation
                           , []#prod.icv_control_law
-                          , path_to_save
+                          , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                           )
 
 
-def injectors_wag(path_to_save):
+def injectors_wag(sim_folder):
+    from config.scripts import settings as sett
     from assembly.scripts.injector_dual_wag import injector_dual_wag
     from inputt.loader import inje_lst
     for inje in inje_lst:
@@ -42,14 +44,14 @@ def injectors_wag(path_to_save):
                           , inje.time_on
                           , inje.wag_operation
                           , inje.layerclump
-                          , path_to_save
+                          , sett.LOCAL_ROOT / sett.SIMS_FOLDER / sim_folder / 'wells'
                           )
 
 
-from config.scripts import settings as sett
-
-
 if __name__ == '__main__':
-    path_to_save = sett.LOCAL_ROOT / sett.SIMS_FOLDER / 'wells'
-    producers(path_to_save)
-    injectors_wag(path_to_save)
+    import pathlib
+    sim_folder_group = pathlib.Path('DEFAULT')
+    sim_folder = sim_folder_group / 'sim_001'
+
+    producers(sim_folder)
+    injectors_wag(sim_folder)
