@@ -7,7 +7,7 @@ Created on Sat Aug 10 09:04:54 2019
 
 
 def producers_icv_binary(sim_folder, well):
-    from config.scripts import settings as sett
+    from config import settings as sett
     from assembly.scripts.producer_dual_icv import producer_dual_icv
     producer_dual_icv(  well.name
                       , well.group
@@ -26,7 +26,7 @@ def producers_icv_binary(sim_folder, well):
 
 
 def injectors_wag(sim_folder):
-    from config.scripts import settings as sett
+    from config import settings as sett
     from assembly.scripts.injector_dual_wag import injector_dual_wag
     from inputt.loader import inje_lst
     for inje in inje_lst:
@@ -49,7 +49,6 @@ def injectors_wag(sim_folder):
 if __name__ == '__main__':
     import pathlib
     from scripts import utils
-    from config.scripts import settings as sett
     from dictionary.scripts.keywords import Keywords as kw
 
     sim_folder_group = pathlib.Path('DEFAULT')
@@ -62,8 +61,9 @@ if __name__ == '__main__':
     for prod in prod_lst:
         prod.load_more_more()
         icvv = icv.ICV(prod.icv_nr)
-        icvv.add_rule([kw.gor() , kw.greater_than(), 1000.0, 'OR', '*STO-RP', kw.less_than(), 250, 0.0])
-        icvv.add_rule([kw.wcut(), kw.greater_than(), 95.0  , 0.0])
+        icvv.add_rule([kw.gor(), kw.greater_than(),  500.0, 'OR', kw.wcut(), kw.less_than(), 85.0, 0.50])
+        icvv.add_rule([kw.gor(), kw.greater_than(),  750.0, 'OR', kw.wcut(), kw.less_than(), 90.0, 0.25])
+        icvv.add_rule([kw.gor(), kw.greater_than(), 1000.0, 'OR', kw.wcut(), kw.less_than(), 95.0, 0.00])
         icvv.write(sim_folder)
         prod.icv_operation = (2008, 183, 200)
         prod.icv_control_law = icvv.get_control_law()
@@ -73,4 +73,5 @@ if __name__ == '__main__':
 
     #sim = utils.run_imex_remote(sim_folder, True, True)
     #while sim.is_alive(): pass
+    #import time; time.sleep(5)
     #utils.run_report(sim_folder, True)

@@ -6,7 +6,7 @@ Codes for fire simulation are commented.
 
 
 def producers(sim_folder):
-    from config.scripts import settings as sett
+    from config import settings as sett
     from assembly.scripts.producer_dual_icv import producer_dual_icv
     from inputt.loader import prod_lst
     for prod in prod_lst:
@@ -28,7 +28,7 @@ def producers(sim_folder):
 
 
 def injectors_wag(sim_folder):
-    from config.scripts import settings as sett
+    from config import settings as sett
     from assembly.scripts.injector_dual_wag import injector_dual_wag
     from inputt.loader import inje_lst
     for inje in inje_lst:
@@ -53,6 +53,7 @@ if __name__ == '__main__':
     from scripts import utils
 
     sim_folder_group = pathlib.Path('DEFAULT')
+    #sim_folder_group = pathlib.Path('REFERENCE')
     sim_folder = sim_folder_group / 'sim_001'
 
     utils.set_folders(sim_folder)
@@ -62,4 +63,5 @@ if __name__ == '__main__':
 
     #sim = utils.run_imex_remote(sim_folder, True, True)
     #while sim.is_alive(): pass
+    #import time; time.sleep(5)    
     #utils.run_report(sim_folder, True)
