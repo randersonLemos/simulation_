@@ -50,18 +50,8 @@ def injectors_wag(sim_folder):
 
 if __name__ == '__main__':
     import pathlib
-    from scripts import utils
-
     sim_folder_group = pathlib.Path('DEFAULT')
-    #sim_folder_group = pathlib.Path('REFERENCE')
     sim_folder = sim_folder_group / 'sim_001'
-
-    utils.set_folders(sim_folder)
 
     producers(sim_folder)
     injectors_wag(sim_folder)
-
-    #sim = utils.run_imex_remote(sim_folder, True, True)
-    #while sim.is_alive(): pass
-    #import time; time.sleep(5)    
-    #utils.run_report(sim_folder, True)
